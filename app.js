@@ -15,22 +15,118 @@ for (const i in ratings) {
   if (ratings[i] > ratings[maxA]) maxA = i;
 }
 bigA = `${titles[maxA]}  ${ratings[maxA]}`;
-console.log("A1 최고 평점:", bigA);
+console.log("A2 최고 평점:", bigA);
 
 //8점 이상
 console.log("A3 8점 이상: :", ratings.filter((r) => r >= 8).length);
 
 //연도대별 영화 수
-const decade = years[i] - (years[i] % 10);
-switch (decade) {
-  case 2020:
-    break;
-  case 2010:
-    break;
-  case 2000:
-    break;
-  default:
+const moviesByYear = {
+  "2020년대": 0,
+  "2010년대": 0,
+  "2000년대": 0,
+  "그 이전": 0,
+};
+let output = "";
+
+for (const i in years) {
+  const decade = years[i] - (years[i] % 10);
+  switch (decade) {
+    case 2020:
+      moviesByYear["2020년대"] += 1;
+      break;
+    case 2010:
+      moviesByYear["2010년대"] += 1;
+      break;
+    case 2000:
+      moviesByYear["2000년대"] += 1;
+      break;
+    default:
+      moviesByYear["그 이전"] += 1;
+  }
 }
+
+for (m in moviesByYear) {
+  output += `${m} ${moviesByYear[m]}편, `;
+}
+console.log("A4 " + output);
+
+//누적 관객 100만 이상인 영화 제목
+const over100m = [];
+for (const i in audiences) {
+  if (audiences[i] > 1000000) over100m.push(titles[i]);
+}
+console.log(
+  "A5 관객 100만 이상: " + (over100m.length > 0 ? over100m.join(" ") : "없음"),
+);
+
+// ===== Part B =====
+
+//average: 배열 ⇒ 평균 평점
+const average = (list) => {
+  let sum = 0;
+  for (const m of list) {
+    sum += m.rating;
+  }
+  return sum / list.length;
+};
+console.log("B1 average: " + average(movies));
+
+//reduceAverage: 배열 ⇒ 평균 평점
+const reduceAverage = (list) => {
+  return list.reduce((acc, m) => acc + m.rating, 0) / list.length;
+};
+console.log("B1 reduceAverage: " + reduceAverage(movies));
+
+//best: 배열 ⇒ 최고 평점 객체
+const best = (list) => {
+  let max = { rating: 0 };
+
+  for (const m of list) {
+    if (m.rating > max.rating) max = m;
+  }
+  return max;
+};
+console.log("B2 best:", best(movies));
+
+//filterByRating: 배열, 숫자 ⇒ 새 배열
+const filterByRating = (list, min) => list.filter((m) => m.rating >= min);
+console.log("B3 filterByRating:", filterByRating(movies, 8));
+
+//sortBy: 배열, 키 이름, 참이면 내림차순 ⇒ 새 배열
+function sortBy(list, key, desc) {
+  const sign = desc ? -1 : 1;
+  return [...list].sort((a, b) => {
+    if (typeof a[key] === "string") return a[key].localeCompare(b[key]);
+    return (a[key] - b[key]) * sign;
+  });
+}
+console.log("B4 sortBy:", sortBy(movies, "rating", true));
+
+//search: 배열, 문자열 ⇒ 새 배열
+const search = (list, keyword) => {
+  const serchedList = [];
+  keyword.trim().toLowerCase();
+  for (const m of list) {
+    if (m.title.toLowerCase().includes(keyword)) serchedList.push(m);
+  }
+  return serchedList;
+};
+console.log("B5 search:", search(movies, "자"));
+
+//formatNumber: 숫자나 숫자 문자열 ⇒ "1,234,567" N
+const formatNumber = (n) => Number(n).toLocaleString("ko-KR");
+console.log("B6 formatNumber:", formatNumber(1234567));
+
+//yearsSince: "2014-11-06" ⇒ 올해까지 몇 년(숫자)
+const yearsSince = (year) => {
+  return new Date().getFullYear() - new Date(year).getFullYear();
+};
+console.log("B7 yearsSince:", yearsSince("2014-11-06"));
+
+//formatDate: "2014-11-06" ⇒ 2014년 11월 6일 (목)
+const formatDate = (d) => {};
+console.log("B8 formatDate:", formatDate("2014-11-06"));
 
 // (function () {
 //   const average = (list) => {
