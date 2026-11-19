@@ -95,11 +95,12 @@ console.log("B3 filterByRating:", filterByRating(movies, 8));
 
 //sortBy: 배열, 키 이름, 참이면 내림차순 ⇒ 새 배열
 function sortBy(list, key, desc) {
-  const sign = desc ? -1 : 1;
-  return [...list].sort((a, b) => {
+  const newList = [...list].sort((a, b) => {
     if (typeof a[key] === "string") return a[key].localeCompare(b[key]);
-    return (a[key] - b[key]) * sign;
+    return a[key] - b[key];
   });
+  if (desc) return newList.reverse();
+  return newList;
 }
 console.log("B4 sortBy:", sortBy(movies, "rating", true));
 
@@ -125,9 +126,50 @@ const yearsSince = (year) => {
 console.log("B7 yearsSince:", yearsSince("2014-11-06"));
 
 //formatDate: "2014-11-06" ⇒ 2014년 11월 6일 (목)
-const formatDate = (d) => {};
+const formatDate = (d) => {
+  const date = new Date(d);
+  const days = ["일", "월", "화", "수", "목", "금", "토"];
+  return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일 (${days[date.getDay()]})`;
+};
 console.log("B8 formatDate:", formatDate("2014-11-06"));
 
+document.getElementById("out").textContent =
+  `전체 10편, 평균 평점 ${average(movies).toFixed(1)}점 \
+ 최고 평점 ${best(movies).title} (${best(movies).rating}점, 개봉한 지 ${yearsSince(best(movies).date)}년)  \
+ 관객 1위 ${sortBy(movies, "audiences", true)[0].title} (누적 ${formatNumber(sortBy(movies, "audiences", true)[0].audiences)}명)`;
+
+// ===== Part C =====
+const getList = (data) => data.results;
+
+const averageBy = (list, key) =>
+  list.reduce((acc, cur) => acc + cur[key], 0) / list.length;
+
+console.log(
+  `C1 page:${TMDB.page}, total_pages:${TMDB.total_pages}, total_results:${TMDB.total_results} 영화 수:${getList(TMDB).length}`,
+);
+
+console.log(
+  `C2 상영작 평균 평점:${averageBy(getList(TMDB), "vote_average").toFixed(1)}`,
+);
+
+console.table(sortBy(getList(TMDB), "vote_average", true).slice(0, 5), [
+  "title",
+  "release_date",
+  "vote_average",
+]);
+
+console.log(`C4 영화 제목 검색:${search(getList(TMDB), "무").length}`);
+
+// loadJson : tmdb.json 파일 ⇒ 콘솔에 평점 상위 5편 표(13주차 fetch 미리 보기)
+async function loadJson() {
+  const res = await fetch("tmdb.json");
+  const data = await res.json();
+  console.table(sortBy(getList(data), "vote_average", true).slice(0, 5), [
+    "title",
+    "vote_average",
+  ]);
+}
+loadJson();
 // (function () {
 //   const average = (list) => {
 //     let sum = 0;
